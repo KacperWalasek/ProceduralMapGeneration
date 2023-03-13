@@ -10,20 +10,17 @@ public class ProceduralTerrain : MonoBehaviour
     public int meshSize;
     public Material terrainMaterial;
 
-    Vector3[,][] vertices;
     int[,][] triangles;
 
     int meshCountX;
     int meshCountZ;
     Transform[,] children;
     Mesh[,] meshes;
-    MeshIterator it;
+    MapIterator it;
     AlgorithmSelector selector;
 
     void CreateChildren()
     {
-        meshCountX = (int)Math.Ceiling((double)xWidth/meshSize);
-        meshCountZ = (int)Math.Ceiling((double)zDepth/meshSize);
         meshes = new Mesh[meshCountX,meshCountZ];
         children = new Transform[meshCountX,meshCountZ];
         for(int i = 0; i<meshCountX; i++)
@@ -42,7 +39,6 @@ public class ProceduralTerrain : MonoBehaviour
     void CreateVertices()
     {
         selector.heightReshaper.Reshape(it,xWidth,zDepth);
-        vertices = it.vertices;
     }
 
     void CreateTriangles()
@@ -51,7 +47,7 @@ public class ProceduralTerrain : MonoBehaviour
         for(int i=0; i<meshCountX; i++)
             for(int j=0; j<meshCountZ; j++)
             {
-                (int width,int depth) meshSize = it.getMeshSize(i,j);
+                (int width,int depth) meshSize = it.map.getMeshSize(i,j);
                 triangles[i,j] = new int[meshSize.width * meshSize.depth * 6];
                 int trianglecount = 0;
                 int vertexcounter = 0;
@@ -79,78 +75,52 @@ public class ProceduralTerrain : MonoBehaviour
             for(int j = 0; j<meshCountZ; j++)
             {
                 meshes[i,j].Clear();
-                meshes[i,j].vertices = vertices[i,j];
+                meshes[i,j].vertices = it.map.vertices[i,j];
                 meshes[i,j].triangles = triangles[i,j];
                 meshes[i,j].RecalculateNormals();
+                meshes[i,j].SetColors(it.map.colors[i,j]);
                 children[i,j].GetComponent<MeshFilter>().mesh = meshes[i,j];
             }
     }
 
     void SetupClimat()
     {
-        for(int i = 0; i<meshCountX; i++)
-            for(int j = 0; j<meshCountZ; j++)  
-            {
-                int len = vertices[i,j].Length;
-                Color[] colors = new Color[len];
-                for(int v = 0; v<len; v++)
-                {   
-                    if(vertices[i,j][v].y>0)
-                        colors[v] = Color.green;
-                    else
-                        colors[v] = Color.blue;
-                }
-                meshes[i,j].SetColors(colors);
-            }
-                
+        foreach(IClimatFactor f in selector.climatFactors)
+            f.Apply(it, xWidth, zDepth);
     }
 
     void SetupBiomes()
     {
-        for(int i = 0; i<meshCountX; i++)
-            for(int j = 0; j<meshCountZ; j++)  
+        for(int i =0; i<xWidth; i++)
+            for(int j=0; j<zDepth; j++)
             {
-                int len = vertices[i,j].Length;
-                Color[] colors = new Color[len];
-                for(int v = 0; v<len; v++)
-                {   
-                    if(vertices[i,j][v].y>0)
-                        colors[v] = Color.green;
+                if(it[i,j].temperature<0)
+                    it[i,j].color = Color.white;
+                else
+                    if(it[i,j].temperature<15)
+                        it[i,j].color = Color.gray;
                     else
-                        colors[v] = Color.blue;
-                }
-                meshes[i,j].SetColors(colors);
-            }
-                
-    }
-
-    (Vector3[,][], int[,][]) divideTriangles(Vector3[] vertices, int[] triangles, int meshCountX, int meshCountZ)
-    {
-        Vector3[,][] dividedVertices = new Vector3[meshCountX,meshCountZ][];
-        int[,][] dividedTriangles = new int[meshCountX,meshCountZ][];
-        for(int i=0; i<meshCountX; i++)
-            for(int j=0; j<meshCountZ; j++)
-            {
-                Vector3[] verticesPart = (Vector3[])vertices.Clone();
-                int[] trianglesPart = (int[])triangles.Clone();
-                dividedVertices[i,j] = verticesPart;
-                dividedTriangles[i,j] = trianglesPart;
-            }
-        return (dividedVertices,dividedTriangles);
+                        if(it[i,j].temperature<30)
+                            it[i,j].color = Color.green;
+                        else
+                            it[i,j].color = Color.yellow;
+            }               
     }
 
     public void UpdateMeshes()
     {
+        meshCountX = (int)Math.Ceiling((double)xWidth/meshSize);
+        meshCountZ = (int)Math.Ceiling((double)zDepth/meshSize);
         selector.Reset();
         foreach (Transform child in children)
             GameObject.Destroy(child.gameObject);
-        it = new MeshIterator(xWidth,zDepth,meshSize);
+        it = new MapIterator(xWidth,zDepth,meshSize,meshCountX,meshCountZ);
         CreateChildren();
         CreateVertices();
         CreateTriangles();
-        SetupMeshes();
         SetupClimat();
         SetupBiomes();
+        SetupMeshes();
     }
     //////////////////////////////////////////////////////
 
@@ -163,11 +133,11 @@ public class ProceduralTerrain : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        if (vertices == null) return;
+        if (it.map.vertices == null) return;
         for (int x = 0; x < meshCountX; x++)
             for (int z = 0; z < meshCountZ; z++)
-                for (int i = 0; i < vertices[x,z].Length; i++)
-                    Gizmos.DrawSphere(vertices[x,z][i], .5f);
+                for (int i = 0; i < it.map.vertices[x,z].Length; i++)
+                    Gizmos.DrawSphere(it.map.vertices[x,z][i], .5f);
     }
 
     public void OnValidate(){

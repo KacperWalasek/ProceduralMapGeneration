@@ -2,5 +2,5 @@ using UnityEngine;
 
 public interface IHeightReshaper 
 {
-    void Reshape(MeshIterator mesh, int xWidth, int zDepth);
+    void Reshape(MapIterator mesh, int xWidth, int zDepth);
 }

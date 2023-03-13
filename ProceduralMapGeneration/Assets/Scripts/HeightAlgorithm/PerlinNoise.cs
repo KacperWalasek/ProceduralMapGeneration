@@ -7,6 +7,7 @@ public class PerlinNoise : IHeightReshaper
     float lacunarity;
     float scale;
     Vector2 offset;
+    float amplitudeMultipier;
     public PerlinNoise(PerlinAttributes perlinAttributes)
     {
         this.octaveCount = perlinAttributes.octaveCount;
@@ -14,9 +15,11 @@ public class PerlinNoise : IHeightReshaper
         this.lacunarity = perlinAttributes.lacunarity;
         this.scale = perlinAttributes.scale;
         this.offset = perlinAttributes.offset;
+        this.offset = perlinAttributes.offset;
+        this.amplitudeMultipier = perlinAttributes.amplitudeMultipier;
     }
 
-    public void Reshape(MeshIterator it, int xWidth, int zDepth)
+    public void Reshape(MapIterator it, int xWidth, int zDepth)
     {
         for(int i = 0; i < xWidth+1; i++)
             for(int j = 0; j < zDepth+1; j++)
@@ -34,7 +37,7 @@ public class PerlinNoise : IHeightReshaper
                     amplitude *= persistance;
                     frequency *= lacunarity;
                 }
-                it[i,j].vertex = new Vector3(i, height*20, j);
+                it[i,j].vertex = new Vector3(i, height*amplitudeMultipier, j);
             }
     }
 }

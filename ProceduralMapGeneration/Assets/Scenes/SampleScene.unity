@@ -329,10 +329,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22a89f4b43b114545a86ebada8d09cde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xWidth: 250
-  zDepth: 250
+  xWidth: 1000
+  zDepth: 1000
   meshSize: 100
-  stretch: 1
   terrainMaterial: {fileID: 2100000, guid: 283b183ceae659144849320b83f398ae, type: 2}
 --- !u!4 &1200831440
 Transform:
@@ -360,13 +359,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56096d79f130f8247bf6d96cc72eb3ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  algorithm: 0
+  heighMapAlgorithm: 0
+  climatAlgorithms: 0000000001000000
   perlinAttributes:
     octaveCount: 10
     persistance: 0.271
     lacunarity: 2
     scale: 0.0001
     offset: {x: 0, y: 0}
+    amplitudeMultipier: 0
   diamondSquereAttributes:
-    decrease: 1
-    initialRandom: 0
+    decrease: 2
+    initialRandom: 53
+    baseHeight: 0

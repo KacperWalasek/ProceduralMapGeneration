@@ -4,43 +4,50 @@ using UnityEngine;
 
 public class MapPoint 
 {
-    Vector3[,][] vertices;
-    float[,][] temperatures;
-    float[,][] humidities;
+    Map map;
     List<(int,int,int)> indices;
     
-    public MapPoint(Vector3[,][] vertices, float[,][] temperatures, float[,][] humidities)
+    public MapPoint(Map map)
     {
-        this.vertices = vertices;
-        this.temperatures = temperatures;
-        this.humidities = humidities;
+        this.map = map;
         indices = new List<(int,int,int)>();
     }
+
+    
     public Vector3 vertex
     {
-        get => vertices[indices[0].Item1,indices[0].Item2][indices[0].Item3];
+        get => map.vertices[indices[0].Item1,indices[0].Item2][indices[0].Item3];
         set 
         {
             foreach ((int x,int z,int j) i in indices)
-                vertices[i.x,i.z][i.j] = value; 
+                map.vertices[i.x,i.z][i.j] = value; 
+        }
+    }
+    public Color color
+    {
+        get => map.colors[indices[0].Item1,indices[0].Item2][indices[0].Item3];
+        set 
+        {
+            foreach ((int x,int z,int j) i in indices)
+                map.colors[i.x,i.z][i.j] = value; 
         }
     }
     public float temperature 
     {
-        get => temperatures[indices[0].Item1,indices[0].Item2][indices[0].Item3];
+        get => map.temperatures[indices[0].Item1,indices[0].Item2][indices[0].Item3];
         set 
         {
             foreach ((int x,int z,int j) i in indices)
-                temperatures[i.x,i.z][i.j] = value; 
+                map.temperatures[i.x,i.z][i.j] = value; 
         }
     }
     public float humidity 
     {
-        get => humidities[indices[0].Item1,indices[0].Item2][indices[0].Item3];
+        get => map.humidities[indices[0].Item1,indices[0].Item2][indices[0].Item3];
         set
         {
             foreach ((int x,int z,int j) i in indices)
-                humidities[i.x,i.z][i.j] = value; 
+                map.humidities[i.x,i.z][i.j] = value; 
         }
     }
     public void addIndices(int meshX, int meshY, int meshIndex)

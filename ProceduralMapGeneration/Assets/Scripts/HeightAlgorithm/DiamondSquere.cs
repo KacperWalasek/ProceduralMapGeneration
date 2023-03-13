@@ -5,13 +5,15 @@ public class DiamondSquere : IHeightReshaper
 {
     public float decrease;
     public float initialRandom;
+    public int baseHeight;
 
     public DiamondSquere(DiamondSquereAttributes diamondSquereAttributes)
     {
         this.decrease = diamondSquereAttributes.decrease;
         this.initialRandom = diamondSquereAttributes.initialRandom;
+        this.baseHeight = diamondSquereAttributes.baseHeight;
     }
-    public void Reshape(MeshIterator it, int xWidth, int zDepth)
+    public void Reshape(MapIterator it, int xWidth, int zDepth)
     {
         int log = (int)Math.Ceiling(Math.Log(Math.Max(xWidth,zDepth),2));
         int mapSize = (int)Math.Pow(2,log) + 1;
@@ -54,7 +56,7 @@ public class DiamondSquere : IHeightReshaper
         for(int i = 0; i < zDepth+1; i++)
             for(int j = 0; j < xWidth+1; j++)
             {
-                it[i,j].vertex = new Vector3(i, (float)tmpMap[i,j], j);
+                it[i,j].vertex = new Vector3(i, (float)tmpMap[i,j] + baseHeight, j);
             }
     }
 }
